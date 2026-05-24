@@ -1,22 +1,25 @@
-#include "textgen.h"
+// Copyright 2021 GHA Test Team
+
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <vector>
 
-using namespace std;
+#include "textgen.h"
 
 int main() {
-    TextGen tg;
-    tg.build("input.txt");
+  TextGen tg;
+  tg.build("input.txt");
 
-    vector<string> result;
-    tg.generate(result, TextGen::MAXGEN);
+  std::vector<std::string> result;
+  tg.generate(result, TextGen::MAXGEN);
 
-    ofstream out("result/gen.txt");
-    for (auto &w : result) {
-        out << w << " ";
-    }
-    out.close();
+  std::ofstream out("result/gen.txt");
+  for (const auto& w : result) {
+    out << w << " ";
+  }
+  out.close();
 
-    cout << "Generated text saved to result/gen.txt\n";
-    return 0;
+  std::cout << "Generated text saved to result/gen.txt\n";
+  return 0;
 }
