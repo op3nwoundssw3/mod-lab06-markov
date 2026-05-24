@@ -16,6 +16,8 @@ void TextGen::addWord(const prefix& p, const std::string& s) {
 }
 
 void TextGen::build(const std::string& filename) {
+  statetab.clear();
+
   std::ifstream in(filename);
   if (!in) {
     std::cerr << "Cannot open input file\n";
@@ -34,7 +36,11 @@ void TextGen::build(const std::string& filename) {
     p.push_back(word);
   }
 
-  addWord(p, "");
+  for (int i = 0; i < NPREF; i++) {
+    addWord(p, "");
+    p.pop_front();
+    p.push_back("");
+  }
 }
 
 const std::map<prefix, std::vector<std::string>>& TextGen::getStateTable()
@@ -45,29 +51,45 @@ const std::map<prefix, std::vector<std::string>>& TextGen::getStateTable()
 void TextGen::generate(std::vector<std::string>& out, int nwords) {
   out.clear();
 
-  prefix p;
+  prefix start;
   for (int i = 0; i < NPREF; i++) {
-    p.push_back("");
+    start.push_back("");
   }
 
+  auto start_it = statetab.find(start);
+  if (start_it == statetab.end() || start_it->second.empty()) {
+    return;
+  }
+
+  bool has_word = false;
+  for (const auto& word : start_it->second) {
+    if (!word.empty()) {
+      has_word = true;
+      break;
+    }
+  }
+
+  if (!has_word) {
+    return;
+  }
+
+  prefix p = start;
   std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr)));
 
-  for (int i = 0; i < nwords; i++) {
+  while (static_cast<int>(out.size()) < nwords) {
     auto it = statetab.find(p);
-    if (it == statetab.end()) {
-      break;
+    if (it == statetab.end() || it->second.empty()) {
+      p = start;
+      continue;
     }
 
     const auto& suffices = it->second;
-    if (suffices.empty()) {
-      break;
-    }
-
     std::uniform_int_distribution<> dist(0, suffices.size() - 1);
     const std::string& next = suffices[dist(gen)];
 
     if (next.empty()) {
-      break;
+      p = start;
+      continue;
     }
 
     out.push_back(next);
