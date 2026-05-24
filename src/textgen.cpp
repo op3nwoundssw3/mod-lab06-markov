@@ -1,69 +1,78 @@
+// Copyright 2021 GHA Test Team
+
 #include "textgen.h"
+
+#include <ctime>
+
 #include <fstream>
-#include <sstream>
-#include <random>
-#include <iterator>
 #include <iostream>
+#include <map>
+#include <random>
+#include <string>
+#include <vector>
 
-using namespace std;
-
-void TextGen::addWord(const prefix &p, const string &s) {
-    statetab[p].push_back(s);
+void TextGen::addWord(const prefix& p, const std::string& s) {
+  statetab[p].push_back(s);
 }
 
-void TextGen::build(const string &filename) {
-    ifstream in(filename);
-    if (!in) {
-        cerr << "Cannot open input file\n";
-        return;
-    }
+void TextGen::build(const std::string& filename) {
+  std::ifstream in(filename);
+  if (!in) {
+    std::cerr << "Cannot open input file\n";
+    return;
+  }
 
-    prefix p;
-    // initialize prefix with NPREF empty strings
-    for (int i = 0; i < NPREF; i++)
-        p.push_back("");
+  prefix p;
+  for (int i = 0; i < NPREF; i++) {
+    p.push_back("");
+  }
 
-    string word;
-    while (in >> word) {
-        addWord(p, word);
-        p.pop_front();
-        p.push_back(word);
-    }
-    // add termination
-    addWord(p, "");
+  std::string word;
+  while (in >> word) {
+    addWord(p, word);
+    p.pop_front();
+    p.push_back(word);
+  }
+
+  addWord(p, "");
 }
 
-const map<prefix, vector<string>>& TextGen::getStateTable() const {
-    return statetab;
+const std::map<prefix, std::vector<std::string>>& TextGen::getStateTable()
+    const {
+  return statetab;
 }
 
-void TextGen::generate(vector<string> &out, int nwords) {
-    out.clear();
-    prefix p;
-    for (int i = 0; i < NPREF; i++)
-        p.push_back("");
+void TextGen::generate(std::vector<std::string>& out, int nwords) {
+  out.clear();
 
-    std::mt19937 gen((unsigned)time(nullptr));
+  prefix p;
+  for (int i = 0; i < NPREF; i++) {
+    p.push_back("");
+  }
 
-    for (int i = 0; i < nwords; i++) {
-        auto it = statetab.find(p);
-        if (it == statetab.end())
-            break;
+  std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr)));
 
-        const auto &suffices = it->second;
-        if (suffices.empty())
-            break;
-
-        // choose random suffix
-        uniform_int_distribution<> dist(0, suffices.size() - 1);
-        const string &next = suffices[dist(gen)];
-
-        if (next.empty())
-            break;
-
-        out.push_back(next);
-
-        p.pop_front();
-        p.push_back(next);
+  for (int i = 0; i < nwords; i++) {
+    auto it = statetab.find(p);
+    if (it == statetab.end()) {
+      break;
     }
+
+    const auto& suffices = it->second;
+    if (suffices.empty()) {
+      break;
+    }
+
+    std::uniform_int_distribution<> dist(0, suffices.size() - 1);
+    const std::string& next = suffices[dist(gen)];
+
+    if (next.empty()) {
+      break;
+    }
+
+    out.push_back(next);
+
+    p.pop_front();
+    p.push_back(next);
+  }
 }
