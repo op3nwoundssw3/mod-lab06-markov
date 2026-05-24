@@ -1,5 +1,7 @@
-#ifndef TEXTGEN_H
-#define TEXTGEN_H
+// Copyright 2021 GHA Test Team
+
+#ifndef INCLUDE_TEXTGEN_H_
+#define INCLUDE_TEXTGEN_H_
 
 #include <deque>
 #include <map>
@@ -9,18 +11,18 @@
 typedef std::deque<std::string> prefix;
 
 class TextGen {
-public:
-    static const int NPREF = 2;
-    static const int MAXGEN = 1200;
+ public:
+  static const int NPREF = 2;
+  static const int MAXGEN = 1200;
 
-    void build(const std::string &filename);
-    void generate(std::vector<std::string> &out, int nwords);
+  void build(const std::string& filename);
+  void generate(std::vector<std::string>& out, int nwords);
 
-    const std::map<prefix, std::vector<std::string>>& getStateTable() const;
+  const std::map<prefix, std::vector<std::string>>& getStateTable() const;
 
-private:
-    std::map<prefix, std::vector<std::string>> statetab;
-    void addWord(const prefix &p, const std::string &s);
+ private:
+  std::map<prefix, std::vector<std::string>> statetab;
+  void addWord(const prefix& p, const std::string& s);
 };
 
-#endif // TEXTGEN_H
+#endif  // INCLUDE_TEXTGEN_H_
